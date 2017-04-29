@@ -1,4 +1,4 @@
-# SiriControl-System
+# SiriControl
 SiriControl is an open source framework designed with developers in mind. It provides a simple way of using Siri commands by dynamically loading modules created by the user. This means that you can add voice controlled capability to any project, with Siri.
 
 - No extra hardware required as the commands are being sent through the iOS device
