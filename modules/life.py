@@ -8,6 +8,6 @@ commandWords = ["meaning","life"]
 
 #This is the main function which will be execute when the above command words are said
 def execute(command):
-    print(xxx)
+    print("\n")
     print("------------------The mesning of life is 42-------------------")
     print("\n")
