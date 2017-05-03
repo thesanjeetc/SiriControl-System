@@ -37,6 +37,7 @@ class Control():
                 self.handle()
             except IndexError:
                 print("You have no Notes. Try creating one right now!")
+                print("Then run this script again.")
         except imaplib.IMAP4.error:
             print("Your username and password is incorrect")
             print("Or IMAP is not enabled.")
