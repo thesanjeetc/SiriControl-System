@@ -104,8 +104,8 @@ class Control():
                     raise ControlException("No command found.")
 
                 print("The word(s) '" + command + "' have been said")
-                foundWords = []
                 for module in self.modules:
+                    foundWords = []
                     for word in module.commandWords:
                         if str(word) in command:
                             foundWords.append(str(word))
