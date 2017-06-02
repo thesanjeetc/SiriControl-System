@@ -1,4 +1,9 @@
+#You can import any required modules here
+
+#This can be anything you want
 moduleName = "templateModule"
+
+#All of the words must be heard in order for this module to be executed
 commandWords = ["xxx"]
 
 def execute(command):
