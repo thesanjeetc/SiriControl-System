@@ -4,7 +4,7 @@
 moduleName = "templateModule"
 
 #All of the words must be heard in order for this module to be executed
-commandWords = ["xxx"]
+commandWords = ["xyz"]
 
 def execute(command):
     #Write anything you want to be executed when the commandWords are heard
