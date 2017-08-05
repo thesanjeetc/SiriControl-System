@@ -3,8 +3,10 @@ import imaplib
 import email
 import os
 import pkgutil
+import sys
+import base64
 from os.path import expanduser, dirname, exists, join, abspath
-from base64 import b64encode, b64decode 
+
 
 ##########################################
 
@@ -14,41 +16,6 @@ from base64 import b64encode, b64decode
 ##########################################
 
 SECFILE = ".siricontrolsecret"
-def get_credentials():
-    possible_locations = set([
-        expanduser('~'), 
-        abspath(dirname(__file__)),
-        os.getcwd()
-    ])
-    user = ""
-    pwd = ""
-    for dir_path in possible_locations:
-        sec_path = join(dir_path, SECFILE) 
-        if exists(sec_path):
-            try:
-                sf = open(sec_path, "r")
-                lines = sf.readlines()
-                user = lines[0].strip()
-                pwd = lines[1].strip()
-                sf.close()
-                if not pwd.startswith("{enc}"):
-                    # pwd not encoded
-                    pwd = "{enc}" + b64encode(pwd)
-                    sf = open(sec_path, "w")
-                    sf.write("\n".join([user , pwd]))
-                    sf.close()
-                return user, b64decode(pwd[5:])
-            except IOError as e:
-                print("Found " + sec_path + " but I couldn't read it: " + e)
-            except IndexError:
-                print("File " + sec_path + " must contain two lines, " + 
-                " username and password, to be valid.")
-
-    #still here? I couldn't find anything
-    raise Exception(SECFILE + 
-                    " not found, please create it" + 
-                    " in one of these folders:\n" +
-                    "\n".join(possible_locations))
 
 class ControlException(Exception):
     pass
@@ -164,6 +131,53 @@ class Control():
                 print("Restarting...")
             time.sleep(1)
 
+def _encode_password(mypwd):
+    if sys.version_info[0] == 2:
+        return base64.encodestring(mypwd).strip("\n")
+    else:
+        return base64.b64encode(mypwd.encode('utf-8')).decode('utf-8')
+
+def _decode_password(mypwd):
+    if sys.version_info[0] == 2:
+        return base64.decodestring(mypwd)
+    else:
+        return base64.b64decode(mypwd).decode('utf-8')
+
+def get_credentials():
+    # SECFILE can be placed in one of these directories
+    possible_locations = set([
+        expanduser('~'),            # home
+        abspath(dirname(__file__)), # same dir as script
+        os.getcwd()                 # working directory
+    ])
+    user = ""
+    pwd = ""
+    for dir_path in possible_locations:
+        sec_path = join(dir_path, SECFILE) 
+        if exists(sec_path):
+            try:
+                sf = open(sec_path, "r")
+                lines = sf.readlines()
+                user = lines[0].strip()
+                pwd = lines[1].strip()
+                sf.close()
+                if not pwd.startswith("{enc}"):
+                    # pwd not encoded
+                    pwd = "{enc}" + _encode_password(pwd)
+                    sf = open(sec_path, "w")
+                    sf.write("\n".join([user , pwd]))
+                    sf.close()
+                return user, _decode_password(pwd[5:])
+            except IOError as e:
+                print("Found " + sec_path + " but I couldn't read it: " + e)
+            except IndexError:
+                print("File " + sec_path + " must contain two lines, " + 
+                " username and password, to be valid.")
+    #still here? I couldn't find anything
+    raise Exception(SECFILE + 
+                    " not found, please create it" + 
+                    " in one of these folders:\n" +
+                    "\n".join(possible_locations))
 
 if __name__ == '__main__':
     Control(get_credentials())
