@@ -180,4 +180,4 @@ def get_credentials():
                     "\n".join(possible_locations))
 
 if __name__ == '__main__':
-    Control(get_credentials())
+    Control(*get_credentials())
