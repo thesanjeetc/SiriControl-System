@@ -3,16 +3,52 @@ import imaplib
 import email
 import os
 import pkgutil
+from os.path import expanduser, dirname, exists, join, abspath
+from base64 import b64encode, b64decode 
 
 ##########################################
 
-# Add your gmail username and password here
-
-username = ""
-password = ""
+# Add your gmail username and password to 
+# a file called .siricontrolsecret
 
 ##########################################
 
+SECFILE = ".siricontrolsecret"
+def get_credentials():
+    possible_locations = set([
+        expanduser('~'), 
+        abspath(dirname(__file__)),
+        os.getcwd()
+    ])
+    user = ""
+    pwd = ""
+    for dir_path in possible_locations:
+        sec_path = join(dir_path, SECFILE) 
+        if exists(sec_path):
+            try:
+                sf = open(sec_path, "r")
+                lines = sf.readlines()
+                user = lines[0].strip()
+                pwd = lines[1].strip()
+                sf.close()
+                if not pwd.startswith("{enc}"):
+                    # pwd not encoded
+                    pwd = "{enc}" + b64encode(pwd)
+                    sf = open(sec_path, "w")
+                    sf.write("\n".join([user , pwd]))
+                    sf.close()
+                return user, b64decode(pwd[5:])
+            except IOError as e:
+                print("Found " + sec_path + " but I couldn't read it: " + e)
+            except IndexError:
+                print("File " + sec_path + " must contain two lines, " + 
+                " username and password, to be valid.")
+
+    #still here? I couldn't find anything
+    raise Exception(SECFILE + 
+                    " not found, please create it" + 
+                    " in one of these folders:\n" +
+                    "\n".join(possible_locations))
 
 class ControlException(Exception):
     pass
@@ -130,4 +166,4 @@ class Control():
 
 
 if __name__ == '__main__':
-    Control(username, password)
+    Control(get_credentials())
