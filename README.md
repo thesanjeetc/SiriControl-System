@@ -8,6 +8,6 @@ SiriControl is an open source framework designed with developers in mind. It pro
 
 Overall, you will be able to add accurate voice controlled capabilities to any project for free. Convinced that SiriControl is awesome?
 
-Well, here is the link on how to get started: https://thereallycoolstuff.wordpress.com/siricontrol-a-voice-control-system/
+Well, here is the link on how to get started: https://medium.com/@thesanjeetc/want-to-control-something-with-siri-heres-how-bae98aceb586
 
 NOTE: This works on python 2.7 and above
