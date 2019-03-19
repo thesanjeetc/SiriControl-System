@@ -23,7 +23,7 @@ class Control():
         print("------------------------------------------------------")
         print("-                    SIRI CONTROL                    -")
         print("-           Created by Sanjeet Chatterjee            -")
-        print("-      Website: thereallycoolstuff.wordpress.com     -")
+        print("-      Website: medium.com/@thesanjeetc              -")
         print("------------------------------------------------------")
 
         try:
