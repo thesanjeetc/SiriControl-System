@@ -3,7 +3,11 @@ import imaplib
 import email
 import os
 import pkgutil
-
+import sys
+import subprocess
+import unidecode
+import requests
+from imap_tools import MailBox, AND
 ##########################################
 
 # Add your gmail username and password here
@@ -23,23 +27,22 @@ class Control():
         print("------------------------------------------------------")
         print("-                    SIRI CONTROL                    -")
         print("-           Created by Sanjeet Chatterjee            -")
+        print("-           Adapted by Pydathon                      -")
         print("-      Website: https://medium.com/@thesanjeetc      -")
         print("------------------------------------------------------")
 
         try:
             self.last_checked = -1
-            self.mail = imaplib.IMAP4_SSL("imap.gmail.com", 993)
-            self.mail.login(username, password)
-            self.mail.list()
-            self.mail.select("Notes")
-
+            self.mail = MailBox('imap.gmail.com')
+            self.mail.login(username, password, initial_folder='Notes')
+            
             # Gets last Note id to stop last command from executing
-            result, uidlist = self.mail.search(None, "ALL")
+            uidlist = [msg.uid for msg in self.mail.fetch(AND(all=True))]
+            subjects = [msg.subject for msg in self.mail.fetch(AND(all=True))]
             try:
-                self.last_checked = uidlist[0].split()[-1]
+                self.last_checked = uidlist[-1].split()[-1]
             except IndexError:
                 pass
-
             self.load()
             self.handle()
         except imaplib.IMAP4.error:
@@ -72,12 +75,10 @@ class Control():
 
     def fetch_command(self):
         """Retrieve the last Note created if new id found"""
-        self.mail.list()
-        self.mail.select("Notes")
-
-        result, uidlist = self.mail.search(None, "ALL")
+        uidlist = [msg.uid for msg in self.mail.fetch(AND(all=True))]
+        subjects = [msg.subject for msg in self.mail.fetch(AND(all=True))]
         try:
-            latest_email_id = uidlist[0].split()[-1]
+            latest_email_id = uidlist[-1].split()[-1]
         except IndexError:
             return
 
@@ -85,33 +86,35 @@ class Control():
             return
 
         self.last_checked = latest_email_id
-        result, data = self.mail.fetch(latest_email_id, "(RFC822)")
-        voice_command = email.message_from_string(data[0][1].decode('utf-8'))
-        return str(voice_command.get_payload()).lower().strip()
+        data = subjects[-1]
+        return data.lower().strip()
 
     def handle(self):
         """Handle new commands
-
         Poll continuously every second and check for new commands.
         """
         print("Fetching commands...")
         print("\n")
 
         while True:
+            folder_status = self.mail.folder.status('Notes') 
+            nb_messages = folder_status["MESSAGES"] # permet d'actualiser la mailbox
             try:
                 command = self.fetch_command()
                 if not command:
                     raise ControlException("No command found.")
-
-                print("The word(s) '" + command + "' have been said")
+                print("The word(s) '" + unidecode.unidecode(str(command).lower()) + "' have been said")
                 for module in self.modules:
                     foundWords = []
                     for word in module.commandWords:
-                        if str(word) in command:
-                            foundWords.append(str(word))
+                        #print("command=",unidecode.unidecode(str(command).lower()))
+                        #print("word=", unidecode.unidecode(str(word).lower()))
+                        #print(unidecode.unidecode(str(word).lower()) in unidecode.unidecode(str(command).lower()))
+                        if unidecode.unidecode(str(word).lower()) in unidecode.unidecode(str(command).lower()):
+                            foundWords.append(unidecode.unidecode(str(word).lower()))
                     if len(foundWords) == len(module.commandWords):
                         try:
-                            module.execute(command)
+                            module.execute(unidecode.unidecode(str(command).lower()))
                             print("The module {0} has been executed "
                                   "successfully.".format(module.moduleName))
                         except:
@@ -120,6 +123,7 @@ class Control():
                                       module.moduleName))
                     else:
                         print("\n")
+                    self.mail.move(self.mail.fetch(), 'notes_old')
             except (TypeError, ControlException):
                 pass
             except Exception as exc:
