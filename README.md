@@ -1,6 +1,6 @@
 # SiriControl
 
-This is an updated version of SiriControl, which allow to use it in French. Here is a complete tutorial to build your own SiriController and running it on the cloud for free: .................
+This is an updated version of SiriControl, which allow to use it in French. Here is a complete tutorial to build your own SiriController and running it on the cloud for free: https://pydathon.medium.com/how-to-build-your-own-virtual-assistant-with-siricontrol-e9d531f05772
 
 ![SiriControl Demo](https://images.ctfassets.net/tvfg2m04ppj4/1PZVE9xziMv8DlKNKJONts/7264a51ae7c8b59ba2b39b49fb86f0cf/SiriControl.jpg)
 
