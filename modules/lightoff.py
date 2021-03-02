@@ -1,3 +1,5 @@
+# This module aim is to trigger a smart plug or bubble to turn it on.
+
 #You can import any required modules here
 import requests
 
