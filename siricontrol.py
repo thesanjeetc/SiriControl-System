@@ -1,5 +1,5 @@
 import time
-import imaplib
+import imaplib2
 import email
 import os
 import pkgutil
@@ -28,7 +28,7 @@ class Control():
 
         try:
             self.last_checked = -1
-            self.mail = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+            self.mail = imaplib2.IMAP4_SSL("imap.gmail.com", 993)
             self.mail.login(username, password)
             self.mail.list()
             self.mail.select("Notes")
@@ -42,7 +42,7 @@ class Control():
 
             self.load()
             self.handle()
-        except imaplib.IMAP4.error:
+        except imaplib2.IMAP4.error:
             print("Your username and password is incorrect")
             print("Or IMAP is not enabled.")
 
@@ -92,13 +92,14 @@ class Control():
     def handle(self):
         """Handle new commands
 
-        Poll continuously every second and check for new commands.
+        Idle until there is a server side update to email
         """
         print("Fetching commands...")
         print("\n")
 
         while True:
             try:
+                self.mail.idle()
                 command = self.fetch_command()
                 if not command:
                     raise ControlException("No command found.")
@@ -126,7 +127,6 @@ class Control():
                 print("Received an exception while running: {exc}".format(
                     **locals()))
                 print("Restarting...")
-            time.sleep(1)
 
 
 if __name__ == '__main__':
